@@ -125,6 +125,7 @@ edgeos_interfaces_ethernet_interfaces:
     speed: auto
     addresses:
       - dhcp
+    vif_interfaces: []
     ipv4_rules:
       - name: WAN_IN
         direction: in
@@ -145,6 +146,7 @@ edgeos_interfaces_ethernet_interfaces:
     speed: auto
     addresses:
       - 192.168.1.1/24
+    vif_interfaces: []
     ipv4_rules: []
     ipv6_rules: []
     dhcp_options: []
@@ -154,6 +156,7 @@ edgeos_interfaces_ethernet_interfaces:
     speed: auto
     addresses:
       - 192.168.2.1/24
+    vif_interfaces: []
     ipv4_rules: []
     ipv6_rules: []
     dhcp_options: []
