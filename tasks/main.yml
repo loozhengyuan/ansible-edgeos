@@ -98,14 +98,15 @@
     - set interfaces loopback lo
   tags: default
 
+# NOTE: Since this is may be new node in the config tree, all of these configuration
+# commands need to be set together in a single commit
 - name: Configure port forwarding options
   edgeos_config:
-    lines: "{{ item }}"
-  loop:
-    - set port-forward auto-firewall {{ edgeos_port_forward_auto_firewall }}
-    - set port-forward hairpin-nat {{ edgeos_port_forward_hairpin_nat }}
-    - set port-forward wan-interface {{ edgeos_port_forward_wan_interface }}
-    - set port-forward lan-interface {{ edgeos_port_forward_lan_interface }}
+    lines:
+      - set port-forward auto-firewall {{ edgeos_port_forward_auto_firewall }}
+      - set port-forward hairpin-nat {{ edgeos_port_forward_hairpin_nat }}
+      - set port-forward wan-interface {{ edgeos_port_forward_wan_interface }}
+      - set port-forward lan-interface {{ edgeos_port_forward_lan_interface }}
   tags: custom
 
 - name: Configure port forwarding rules
