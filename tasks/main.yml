@@ -23,6 +23,20 @@
     - set firewall syn-cookies {{ edgeos_firewall_syn_cookies }}
   tags: default
 
+- name: Configure firewall groups
+  edgeos_config:
+    lines:
+      - set firewall group {{ item.type }} {{ item.name }} description {{ item.description }}
+  loop: "{{ edgeos_firewall_groups }}"
+  tags: custom
+
+- name: Configure firewall group networks
+  edgeos_config:
+    lines:
+      - set firewall group {{ item.0.type }} {{ item.0.name }} {{ item.1.type }} {{ item.1.member }}
+  loop: "{{ edgeos_firewall_groups | subelements('members', skip_missing=True) }}"
+  tags: custom
+
 # TODO: ipv4 ruleset rules
 - name: Configure firewall ipv4 rulesets
   edgeos_config:

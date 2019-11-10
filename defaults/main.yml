@@ -11,6 +11,7 @@ edgeos_firewall_receive_redirects: disable
 edgeos_firewall_send_redirects: enable
 edgeos_firewall_source_validation: disable
 edgeos_firewall_syn_cookies: enable
+edgeos_firewall_groups: []
 edgeos_firewall_ipv4_rulesets:
   - name: WAN_IN
     default: drop
