@@ -53,6 +53,7 @@
   loop: "{{ edgeos_firewall_ipv6_rulesets | subelements('options', skip_missing=True) }}"
 
 # TODO: dhcpv6-pd
+# TODO: vif interfaces
 - name: Configure ethernet interfaces
   edgeos_config:
     lines:
