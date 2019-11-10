@@ -1,4 +1,5 @@
 ---
+# TODO: Purge config node in tree before configuring (may require commands not to be looped)
 - name: Initial backup
   edgeos_config:
     backup: yes
