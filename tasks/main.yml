@@ -89,7 +89,7 @@
 - name: Configure ethernet interface vif
   edgeos_config:
     lines:
-      - set interfaces ethernet {{ item.0.interface }} vif {{ item.1.id }} address {{ item.1.vlan }}
+      - set interfaces ethernet {{ item.0.interface }} vif {{ item.1.id }} address {{ item.1.address }}
       - set interfaces ethernet {{ item.0.interface }} vif {{ item.1.id }} description {{ item.1.description }}
       - set interfaces ethernet {{ item.0.interface }} vif {{ item.1.id }} mtu {{ item.1.mtu }}
   loop: "{{ edgeos_interfaces_ethernet_interfaces | subelements('vif_interfaces', skip_missing=True) }}"
