@@ -228,6 +228,7 @@ edgeos_system_ntp_servers:
   - 3.ubnt.pool.ntp.org
 edgeos_system_offload_ipv4_forwarding: enable
 edgeos_system_offload_ipv4_gre: disable
+edgeos_system_offload_ipv4_pppoe: disable
 edgeos_system_offload_ipv4_vlan: disable
 edgeos_system_offload_ipv6_forwarding: disable
 edgeos_system_offload_ipv6_pppoe: disable
