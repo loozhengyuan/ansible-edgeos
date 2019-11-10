@@ -68,7 +68,6 @@
   loop: "{{ edgeos_firewall_ipv6_rulesets | subelements('options', skip_missing=True) }}"
 
 # TODO: dhcpv6-pd
-# TODO: vif interfaces
 - name: Configure ethernet interfaces
   edgeos_config:
     lines:
@@ -84,6 +83,17 @@
       - set interfaces ethernet {{ item.0.interface }} address {{ item.1 }}
   loop: "{{ edgeos_interfaces_ethernet_interfaces | subelements('addresses', skip_missing=True) }}"
   tags: default
+
+# TODO: Support multiple vif addresses
+# TODO: Support firewall definitions for vifs
+- name: Configure ethernet interface vif
+  edgeos_config:
+    lines:
+      - set interfaces ethernet {{ item.0.interface }} vif {{ item.1.id }} address {{ item.1.vlan }}
+      - set interfaces ethernet {{ item.0.interface }} vif {{ item.1.id }} description {{ item.1.description }}
+      - set interfaces ethernet {{ item.0.interface }} vif {{ item.1.id }} mtu {{ item.1.mtu }}
+  loop: "{{ edgeos_interfaces_ethernet_interfaces | subelements('vif_interfaces', skip_missing=True) }}"
+  tags: custom
 
 - name: Configure ethernet interface firewall ipv4 rules
   edgeos_config:
