@@ -26,14 +26,14 @@
 - name: Configure firewall groups
   edgeos_config:
     lines:
-      - set firewall group {{ item.type }} {{ item.name }} description {{ item.description }}
+      - set firewall group {{ item.type }}-group {{ item.name }} description {{ item.description }}
   loop: "{{ edgeos_firewall_groups }}"
   tags: custom
 
 - name: Configure firewall group networks
   edgeos_config:
     lines:
-      - set firewall group {{ item.0.type }} {{ item.0.name }} {{ item.1.type }} {{ item.1.member }}
+      - set firewall group {{ item.0.type }}-group {{ item.0.name }} {{ item.0.type }} {{ item.1 }}
   loop: "{{ edgeos_firewall_groups | subelements('members', skip_missing=True) }}"
   tags: custom
 
