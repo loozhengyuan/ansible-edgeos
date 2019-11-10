@@ -1,2 +1,239 @@
 ---
-# defaults file for edgeos
+ansible_connection: network_cli
+ansible_network_os: edgeos
+edgeos_firewall_all_ping: enable
+edgeos_firewall_broadcast_ping: disable
+edgeos_firewall_ipv6_receive_redirects: disable
+edgeos_firewall_ipv6_src_route: disable
+edgeos_firewall_ip_src_route: disable
+edgeos_firewall_log_martians: enable
+edgeos_firewall_receive_redirects: disable
+edgeos_firewall_send_redirects: enable
+edgeos_firewall_source_validation: disable
+edgeos_firewall_syn_cookies: enable
+edgeos_firewall_ipv4_rulesets:
+  - name: WAN_IN
+    default: drop
+    description: WAN to internal
+    options: []
+    rules:
+      - rule: 10
+        action: accept
+        description: Allow established/related
+        states:
+          established: enable
+          related: enable
+        protocol:
+        source:
+        destination:
+      - rule: 20
+        action: drop
+        description: Drop invalid state
+        states:
+          invalid: enable
+        protocol:
+        source:
+        destination:
+  - name: WAN_LOCAL
+    default: drop
+    description: WAN to router
+    options: []
+    rules:
+      - rule: 10
+        action: accept
+        description: Allow established/related
+        states:
+          established: enable
+          related: enable
+        protocol:
+        source:
+        destination:
+      - rule: 20
+        action: drop
+        description: Drop invalid state
+        states:
+          invalid: enable
+        protocol:
+        source:
+        destination:
+edgeos_firewall_ipv6_rulesets:
+  - name: WANv6_IN
+    default: drop
+    description: WAN inbound traffic forwarded to LAN
+    options:
+      - enable-default-log
+    rules:
+      - rule: 10
+        action: accept
+        description: Allow established/related sessions
+        states:
+          established: enable
+          related: enable
+        protocol:
+        source:
+        destination:
+      - rule: 20
+        action: drop
+        description: Drop invalid state
+        states:
+          invalid: enable
+        protocol:
+        source:
+        destination:
+  - name: WANv6_LOCAL
+    default: drop
+    description: WAN inbound traffic to the router
+    options:
+      - enable-default-log
+    rules:
+      - rule: 10
+        action: accept
+        description: Allow established/related sessions
+        states:
+          established: enable
+          related: enable
+        protocol:
+        source:
+        destination:
+      - rule: 20
+        action: drop
+        description: Drop invalid state
+        states:
+          invalid: enable
+        protocol:
+        source:
+        destination:
+      - rule: 30
+        action: accept
+        description: Allow IPv6 icmp
+        states: []
+        protocol: ipv6-icmp
+        source:
+        destination:
+      - rule: 40
+        action: accept
+        description: allow dhcpv6
+        states: []
+        protocol: udp
+        source: port 547
+        destination: port 546
+edgeos_interfaces_ethernet_eth0_addresses: [dhcp]
+edgeos_interfaces_ethernet_eth0_description: Internet
+edgeos_interfaces_ethernet_eth0_duplex: auto
+edgeos_interfaces_ethernet_eth0_speed: auto
+edgeos_interfaces_ethernet_eth0_dhcpv6_pd:
+  - interface: eth1
+    host: '::1'
+    prefix: ':1'
+    service: slaac
+  - interface: eth2
+    host: '::1'
+    prefix: ':1'
+    service: slaac
+edgeos_interfaces_ethernet_interfaces:
+  - interface: eth0
+    description: Internet
+    duplex: auto
+    speed: auto
+    addresses:
+      - dhcp
+    ipv4_rules:
+      - name: WAN_IN
+        direction: in
+      - name: WAN_LOCAL
+        direction: local
+    ipv6_rules:
+      - name: WANv6_IN
+        direction: in
+      - name: WANv6_LOCAL
+        direction: local
+    dhcp_options:
+      - default-route update
+      - default-route-distance 210
+      - name-server no-update
+  - interface: eth1
+    description: Local
+    duplex: auto
+    speed: auto
+    addresses:
+      - 192.168.1.1/24
+    ipv4_rules: []
+    ipv6_rules: []
+    dhcp_options: []
+  - interface: eth2
+    description: Local 2
+    duplex: auto
+    speed: auto
+    addresses:
+      - 192.168.2.1/24
+    ipv4_rules: []
+    ipv6_rules: []
+    dhcp_options: []
+edgeos_port_forward_auto_firewall: enable
+edgeos_port_forward_hairpin_nat: enable
+edgeos_port_forward_wan_interface: eth0
+edgeos_port_forward_lan_interface: eth1
+edgeos_port_forward_rules: []
+edgeos_service_dhcpv4_server_disabled: 'false'
+edgeos_service_dhcpv4_server_hostfile_update: disable
+edgeos_service_dhcpv4_server_static_arp: disable
+edgeos_service_dhcpv4_server_use_dnsmasq: disable
+edgeos_service_dhcpv4_server_scopes:
+  - name: LAN1
+    authorative: enable
+    subnet: 192.168.1.0/24
+    gateway: 192.168.1.1
+    dns: 192.168.1.1
+    lease: 86400
+    start: 192.168.1.38
+    stop: 192.168.1.243
+    reservations: []
+  - name: LAN2
+    authorative: enable
+    subnet: 192.168.2.0/24
+    gateway: 192.168.2.1
+    dns: 192.168.2.1
+    lease: 86400
+    start: 192.168.2.38
+    stop: 192.168.2.243
+    reservations: []
+edgeos_service_dns_dynamic_services: []
+edgeos_service_dns_forwarding_cache_size: 150
+edgeos_service_dns_forwarding_listen_on: [eth1, eth2]
+edgeos_service_dns_forwarding_nameservers: []
+edgeos_service_dns_forwarding_options: []
+edgeos_service_gui_http_port: 80
+edgeos_service_gui_https_port: 443
+edgeos_service_gui_older_ciphers: enable
+edgeos_service_nat_rules:
+  - rule: 5010
+    description: masquerade for WAN
+    outbound: eth0
+    type: masquerade
+edgeos_service_ssh_port: 22
+edgeos_service_ssh_version: v2
+edgeos_system_config_management_commit_revisions: 10
+edgeos_system_domain_name: ubnt.local
+edgeos_system_host_name: ubnt
+edgeos_system_ip_override_hostname_ip: 127.0.1.1
+edgeos_system_login_users:
+  - username: ubnt
+    level: admin
+    keys: []
+edgeos_system_nameserver: 127.0.0.1
+edgeos_system_ntp_servers:
+  - 0.ubnt.pool.ntp.org
+  - 1.ubnt.pool.ntp.org
+  - 2.ubnt.pool.ntp.org
+  - 3.ubnt.pool.ntp.org
+edgeos_system_offload_ipv4_forwarding: enable
+edgeos_system_offload_ipv4_gre: disable
+edgeos_system_offload_ipv4_vlan: disable
+edgeos_system_offload_ipv6_forwarding: disable
+edgeos_system_offload_ipv6_pppoe: disable
+edgeos_system_offload_ipv6_vlan: disable
+edgeos_system_syslog_level_all: notice
+edgeos_system_syslog_level_protocols: debug
+edgeos_system_timezone: UTC
+edgeos_system_traffic_analysis_dpi: enable
+edgeos_system_traffic_analysis_export: enable

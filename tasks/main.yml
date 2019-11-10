@@ -1,2 +1,324 @@
 ---
-# tasks file for edgeos
+- name: Initial backup
+  edgeos_config:
+    backup: yes
+    backup_options:
+      dir_path: "."
+
+- name: Configure firewall options
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set firewall all-ping {{ edgeos_firewall_all_ping }}
+    - set firewall broadcast-ping {{ edgeos_firewall_broadcast_ping }}
+    - set firewall ipv6-receive-redirects {{ edgeos_firewall_ipv6_receive_redirects }}
+    - set firewall ipv6-src-route {{ edgeos_firewall_ipv6_src_route }}
+    - set firewall ip-src-route {{ edgeos_firewall_ip_src_route }}
+    - set firewall log-martians {{ edgeos_firewall_log_martians }}
+    - set firewall receive-redirects {{ edgeos_firewall_receive_redirects }}
+    - set firewall send-redirects {{ edgeos_firewall_send_redirects }}
+    - set firewall source-validation {{ edgeos_firewall_source_validation }}
+    - set firewall syn-cookies {{ edgeos_firewall_syn_cookies }}
+  tags: default
+
+# TODO: ipv4 ruleset rules
+- name: Configure firewall ipv4 rulesets
+  edgeos_config:
+    lines:
+      - set firewall name {{ item.name }} default-action {{ item.default }}
+      - set firewall name {{ item.name }} description '{{ item.description }}'
+  loop: "{{ edgeos_firewall_ipv4_rulesets }}"
+  tags: default
+
+- name: Configure firewall ipv4 ruleset options
+  edgeos_config:
+    lines:
+      - set firewall name {{ item.0.name }} {{ item.1 }}
+  loop: "{{ edgeos_firewall_ipv4_rulesets | subelements('options', skip_missing=True) }}"
+  tags: default
+
+# TODO: ipv6 ruleset rules
+- name: Configure firewall ipv6 rulesets
+  edgeos_config:
+    lines:
+      - set firewall ipv6-name {{ item.name }} default-action {{ item.default }}
+      - set firewall ipv6-name {{ item.name }} description '{{ item.description }}'
+  loop: "{{ edgeos_firewall_ipv6_rulesets }}"
+
+- name: Configure firewall ipv6 ruleset options
+  edgeos_config:
+    lines:
+      - set firewall ipv6-name {{ item.0.name }} {{ item.1 }}
+  loop: "{{ edgeos_firewall_ipv6_rulesets | subelements('options', skip_missing=True) }}"
+
+# TODO: dhcpv6-pd
+- name: Configure ethernet interfaces
+  edgeos_config:
+    lines:
+      - set interfaces ethernet {{ item.interface }} description {{ item.description }}
+      - set interfaces ethernet {{ item.interface }} duplex {{ item.duplex }}
+      - set interfaces ethernet {{ item.interface }} speed {{ item.speed }}
+  loop: "{{ edgeos_interfaces_ethernet_interfaces }}"
+  tags: default
+
+- name: Configure ethernet interface addresses
+  edgeos_config:
+    lines:
+      - set interfaces ethernet {{ item.0.interface }} address {{ item.1 }}
+  loop: "{{ edgeos_interfaces_ethernet_interfaces | subelements('addresses', skip_missing=True) }}"
+  tags: default
+
+- name: Configure ethernet interface firewall ipv4 rules
+  edgeos_config:
+    lines:
+      - set interfaces ethernet {{ item.0.interface }} firewall {{ item.1.direction }} name {{ item.1.name }}
+  loop: "{{ edgeos_interfaces_ethernet_interfaces | subelements('ipv4_rules', skip_missing=True) }}"
+  tags: default
+
+- name: Configure ethernet interface firewall ipv6 rules
+  edgeos_config:
+    lines:
+      - set interfaces ethernet {{ item.0.interface }} firewall {{ item.1.direction }} ipv6-name {{ item.1.name }}
+  loop: "{{ edgeos_interfaces_ethernet_interfaces | subelements('ipv6_rules', skip_missing=True) }}"
+  tags: default
+
+- name: Configure ethernet interface dhcp options
+  edgeos_config:
+    lines:
+      - set interfaces ethernet {{ item.0.interface }} dhcp-options {{ item.1 }}
+  loop: "{{ edgeos_interfaces_ethernet_interfaces | subelements('dhcp_options', skip_missing=True) }}"
+  tags: custom
+
+- name: Configure loopback interfaces
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set interfaces loopback lo
+  tags: default
+
+- name: Configure port forwarding options
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set port-forward auto-firewall {{ edgeos_port_forward_auto_firewall }}
+    - set port-forward hairpin-nat {{ edgeos_port_forward_hairpin_nat }}
+    - set port-forward wan-interface {{ edgeos_port_forward_wan_interface }}
+    - set port-forward lan-interface {{ edgeos_port_forward_lan_interface }}
+  tags: custom
+
+- name: Configure port forwarding rules
+  edgeos_config:
+    lines:
+      - set port-forward rule {{ item.rule }} forward-to address {{ item.address }}
+      - set port-forward rule {{ item.rule }} forward-to port {{ item.to }}
+      - set port-forward rule {{ item.rule }} original-port {{ item.from }}
+      - set port-forward rule {{ item.rule }} protocol {{ item.protocol }}
+  loop: "{{ edgeos_port_forward_rules }}"
+  tags: custom
+
+- name: Configure dhcpv4 server options
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set service dhcp-server disabled {{ edgeos_service_dhcpv4_server_disabled }}
+    - set service dhcp-server hostfile-update {{ edgeos_service_dhcpv4_server_hostfile_update }}
+    - set service dhcp-server static-arp {{ edgeos_service_dhcpv4_server_static_arp }}
+    - set service dhcp-server use-dnsmasq {{ edgeos_service_dhcpv4_server_use_dnsmasq }}
+  tags: default
+
+# TODO dhcp scope domain name
+- name: Configure dhcpv4 server scopes
+  edgeos_config:
+    lines:
+      - set service dhcp-server shared-network-name {{ item.name }} authoritative {{ item.authorative }}
+      - set service dhcp-server shared-network-name {{ item.name }} subnet {{ item.subnet }} default-router {{ item.gateway }}
+      - set service dhcp-server shared-network-name {{ item.name }} subnet {{ item.subnet }} dns-server {{ item.dns }}
+      - set service dhcp-server shared-network-name {{ item.name }} subnet {{ item.subnet }} lease {{ item.lease }}
+      - set service dhcp-server shared-network-name {{ item.name }} subnet {{ item.subnet }} start {{ item.start }} stop {{ item.stop }}
+  loop: "{{ edgeos_service_dhcpv4_server_scopes }}"
+  tags: default
+
+- name: Configure dhcpv4 server reservations
+  edgeos_config:
+    lines:
+      - set service dhcp-server shared-network-name {{ item.0.name }} subnet {{ item.0.subnet }} static-mapping {{ item.1.host }} ip-address {{ item.1.ip }}
+      - set service dhcp-server shared-network-name {{ item.0.name }} subnet {{ item.0.subnet }} static-mapping {{ item.1.host }} mac-address {{ item.1.mac }}
+  loop: "{{ edgeos_service_dhcpv4_server_scopes | subelements('reservations', skip_missing=True) }}"
+  tags: custom
+
+# TODO: Allow non-eth0 interfaces
+# TODO: Allow multiple options
+- name: Configure dns dynamic services
+  edgeos_config:
+    lines:
+      - set service dns dynamic interface eth0 service {{ item.name }} protocol {{ item.protocol }}
+      - set service dns dynamic interface eth0 service {{ item.name }} host-name {{ item.host }}
+      - set service dns dynamic interface eth0 service {{ item.name }} login {{ item.login }}
+      - set service dns dynamic interface eth0 service {{ item.name }} password {{ item.password }}
+      - set service dns dynamic interface eth0 service {{ item.name }} options {{ item.options }}
+  loop: "{{ edgeos_service_dns_dynamic_services }}"
+  tags: custom
+
+- name: Configure dns forwarding cache size
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set service dns forwarding cache-size {{ edgeos_service_dns_forwarding_cache_size }}
+  tags: default
+
+- name: Configure dns forwarding listen on
+  edgeos_config:
+    lines:
+      - set service dns forwarding listen-on {{ item }}
+  loop: "{{ edgeos_service_dns_forwarding_listen_on }}"
+  tags: default
+
+- name: Configure dns forwarding nameservers
+  edgeos_config:
+    lines:
+      - set service dns forwarding name-server {{ item }}
+  loop: "{{ edgeos_service_dns_forwarding_nameservers }}"
+  tags: custom
+
+- name: Configure dns forwarding options
+  edgeos_config:
+    lines:
+      - set service dns forwarding options {{ item }}
+  loop: "{{ edgeos_service_dns_forwarding_options }}"
+  tags: custom
+
+# TODO: listen-address
+- name: Configure gui options
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set service gui http-port {{ edgeos_service_gui_http_port }}
+    - set service gui https-port {{ edgeos_service_gui_https_port }}
+    - set service gui older-ciphers {{ edgeos_service_gui_older_ciphers }}
+  tags: default
+
+- name: Configure nat rules
+  edgeos_config:
+    lines:
+      - set service nat rule {{ item.rule }} description '{{ item.description }}'
+      - set service nat rule {{ item.rule }} outbound-interface {{ item.outbound }}
+      - set service nat rule {{ item.rule }} type {{ item.type }}
+  loop: "{{ edgeos_service_nat_rules }}"
+  tags: default
+
+# TODO: disable-password-authentication
+# TODO: listen-address
+- name: Configure ssh options
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set service ssh port {{ edgeos_service_ssh_port }}
+    - set service ssh protocol-version {{ edgeos_service_ssh_version }}
+  tags: default
+
+# TODO: disable ubnt-discover
+
+- name: Configure system config-management
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set system config-management commit-revisions {{ edgeos_system_config_management_commit_revisions }}
+  tags: custom
+
+- name: Configure system domain-name
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set system domain-name {{ edgeos_system_domain_name }}
+  tags: custom
+
+- name: Configure system host-name
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set system host-name {{ edgeos_system_host_name }}
+  tags: default
+
+- name: Configure system ip
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set system ip override-hostname-ip {{ edgeos_system_ip_override_hostname_ip }}
+  tags: custom
+
+# TODO: disable ubnt user
+- name: Configure system login user
+  edgeos_config:
+    lines:
+      - set system login user {{ item.username }} level {{ item.level }}
+  loop: "{{ edgeos_system_login_users }}"
+  tags: default
+
+- name: Configure system login user public-keys
+  edgeos_config:
+    lines:
+      - set system login user {{ item.0.username }} authentication public-keys {{ item.1.name }} type {{ item.1.type }}
+      - set system login user {{ item.0.username }} authentication public-keys {{ item.1.name }} key {{ item.1.key }}
+  loop: "{{ edgeos_system_login_users | subelements('keys', skip_missing=True) }}"
+  tags: custom
+
+- name: Configure system nameserver
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set system name-server {{ edgeos_system_nameserver }}
+  tags: custom
+
+- name: Configure system ntp servers
+  edgeos_config:
+    lines:
+      - set system ntp server {{ item }}
+  loop: "{{ edgeos_system_ntp_servers }}"
+  tags: default
+
+# TODO: bonding # >=2.0.0 only
+- name: Configure system offload ipv4
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set system offload ipv4 forwarding {{ edgeos_system_offload_ipv4_forwarding }}
+    - set system offload ipv4 gre {{ edgeos_system_offload_ipv4_gre }}
+    - set system offload ipv4 pppoe {{ edgeos_system_offload_ipv4_pppoe }}
+    - set system offload ipv4 vlan {{ edgeos_system_offload_ipv4_vlan }}
+  tags: custom
+
+# TODO: pppoe # cannot be enabled with vlan
+- name: Configure system offload ipv6
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set system offload ipv6 forwarding {{ edgeos_system_offload_ipv6_forwarding }}
+    - set system offload ipv6 vlan {{ edgeos_system_offload_ipv6_vlan }}
+  tags: custom
+
+- name: Configure system syslog levels
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set system syslog global facility all level {{ edgeos_system_syslog_level_all }}
+    - set system syslog global facility protocols level {{ edgeos_system_syslog_level_protocols }}
+  tags: default
+
+- name: Configure system timezone
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set system time-zone {{ edgeos_system_timezone }}
+  tags: default
+
+- name: Configure system traffic-analysis
+  edgeos_config:
+    lines: "{{ item }}"
+  loop:
+    - set system traffic-analysis dpi {{ edgeos_system_traffic_analysis_dpi }}
+    - set system traffic-analysis export {{ edgeos_system_traffic_analysis_export }}
+  tags: custom
+
+- name: Save config
+  edgeos_config:
+    save: yes
