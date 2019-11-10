@@ -4,6 +4,7 @@
     backup: yes
     backup_options:
       dir_path: "."
+  tags: backup
 
 - name: Configure firewall options
   edgeos_config:
@@ -322,3 +323,4 @@
 - name: Save config
   edgeos_config:
     save: yes
+  tags: save
