@@ -118,19 +118,6 @@ edgeos_firewall_ipv6_rulesets:
         protocol: udp
         source: port 547
         destination: port 546
-edgeos_interfaces_ethernet_eth0_addresses: [dhcp]
-edgeos_interfaces_ethernet_eth0_description: Internet
-edgeos_interfaces_ethernet_eth0_duplex: auto
-edgeos_interfaces_ethernet_eth0_speed: auto
-edgeos_interfaces_ethernet_eth0_dhcpv6_pd:
-  - interface: eth1
-    host: '::1'
-    prefix: ':1'
-    service: slaac
-  - interface: eth2
-    host: '::1'
-    prefix: ':1'
-    service: slaac
 edgeos_interfaces_ethernet_interfaces:
   - interface: eth0
     description: Internet
