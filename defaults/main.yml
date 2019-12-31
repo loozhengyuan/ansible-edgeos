@@ -1,6 +1,8 @@
 ---
 ansible_connection: network_cli
 ansible_network_os: edgeos
+edgeos_ansible_backup: false
+edgeos_ansible_save: false
 edgeos_firewall_all_ping: enable
 edgeos_firewall_broadcast_ping: disable
 edgeos_firewall_ipv6_receive_redirects: disable
